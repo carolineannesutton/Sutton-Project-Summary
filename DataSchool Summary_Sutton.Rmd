@@ -1,0 +1,123 @@
+---
+title: "Oragne Roughy Eastern Zone Survey Data"
+subtitle: "Survey Data from 2019"
+author: "Caroline Sutton"
+affiliation: "CSIRO Oceans and Atmosphere"
+photo: resources/img/photo.jpg
+
+short_title: Optional short title
+
+output: 
+  DSreport::project_summary:
+    code_folding: hide
+
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo=TRUE,
+  warning = FALSE,
+  message = FALSE,
+  results = 'asis',
+  fig.align = 'center')
+
+#Load libraries
+library(tidyverse)
+library(gapminder)
+library(kableExtra)
+Roughy<-read_csv("Results/OREastern_tidy2019.csv") %>% 
+  mutate(Length = SLadj_cm)
+```
+# Introduction
+I'm a biologist with CSIRO's Marine Resources and Industries working in the Acoustics & Pelagic Ecosystems Team. I manage the biological data within the group. This includes colating and standardising historical and new data. I learned to code at Data School. Prior to Data School I managed my data and conducted statistical analyses using Excel, Access and Systat.
+
+# My Project
+I am using Data from the 2019. This included
+
+## Preliminary results
+
+This section will demonstrate the different visuals you might want use to show off your 
+project. Don't feel the need to go overboard, this is supposed to give a taste of the work you are
+doing rather than being a publication ready document.
+
+To get tables formatting correctly, use `knitr::kable` to convert the table to html format. If
+you also want to have alternate row highlighting, pass the result to `kable_styling('striped')` 
+from the `kableExtra` package.
+
+**Tables**
+---
+```{r mytable, out.width='100%', echo = T}
+knitr::kable(head(Roughy, n = 5), format = "html", caption = "my tidy data") %>% 
+  kable_styling("striped")
+```
+
+**Images from a file**
+
+![](resources/img/tidyverse.png){width=100px}
+
+**Plots from R**
+
+```{r standard-plot, raw data }
+#create a summary table
+Roughy1_group <- Roughy %>% 
+  group_by(year,Area_MS,sex) %>% 
+  summarise(SLadj_cm_mean = mean(SLadj_cm),
+            sdSL = sd(SLadj_cm, na.rm = TRUE),
+            n(),
+            seSL = sd(SLadj_cm) / sqrt(n())
+            ) %>% 
+  rename(Length = SLadj_cm_mean)
+
+#ploting raw data with means
+ggplot(data = Roughy,
+       mapping = aes(x = year,
+                     y = Length,
+                     colour = sex)) +
+  geom_jitter(width = .5, size = 1)+
+    
+    
+  geom_line(data=Roughy1_group, size = 1
+          )+
+  theme(legend.position = "bottom")+
+  facet_wrap(~Area_MS)
+```
+
+Your figure and table captions are automatically numbered and can be referenced in the text
+if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
+
+# My Digital Toolbox
+
+What digital tools have you been using in your project? Which ones have you learned since starting 
+Data School?
+
+You can use all the usual R markdown features in writing a project summary, including lists:
+
+* R - dplyr, ggplot, ...
+* Python
+* SQL
+
+## Favourite tool (optional)
+
+Is there a tool/package/function in particular that you've enjoyed using? Give it a special shout out here.
+
+![](https://raw.githubusercontent.com/tidyverse/ggplot2/master/man/figures/logo.png){.pull-right width=100px}
+
+No prizes for guessing mine:
+
+# My time went ...
+
+What parts of the project took the most time and effort? Were there any surprising challenges you
+encountered, and how did you solve them?
+
+# Next steps
+
+What further steps do you wish your project could take? Or are there any new digital skills that you
+are keen to develop as a result of your involvement in the Data School?
+
+# My Data School Experience
+
+This poster is mostly about your synthesis project. However we would also like to hear about other
+parts of your Data School experience. What aspects of the program did you really enjoy? How have you
+been applying the skills you have learned in your daily work? Have you been able to transfer this 
+knowledge to your team members? Concrete examples demonstrating this would be useful here
+(meetings/talks/collaborations/new roles). Any descriptions of the personal impact the program has 
+had are welcome here as well!
