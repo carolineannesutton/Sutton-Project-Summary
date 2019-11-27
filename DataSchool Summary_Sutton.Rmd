@@ -24,7 +24,7 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(gapminder)
 library(kableExtra)
-Roughy<-read_csv("Results/OREastern_tidy2019.csv") %>% 
+Roughy<-read_csv("Results/OR87to2016.csv") %>% 
   mutate(Length = SLadj_cm)
 ```
 # Introduction
@@ -56,7 +56,7 @@ knitr::kable(head(Roughy, n = 5), format = "html", caption = "my tidy data") %>%
 
 **Plots from R**
 
-```{r standard-plot, raw data }
+```{r myfig1, out.width='100%', fig.align='center', fig.cap= "raw length data with means by year"}
 #create a summary table
 Roughy1_group <- Roughy %>% 
   group_by(year,Area_MS,sex) %>% 
@@ -83,6 +83,48 @@ ggplot(data = Roughy,
 
 Your figure and table captions are automatically numbered and can be referenced in the text
 if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
+
+```{r myfig2}
+head(Roughy)
+#filter(Roughy, Area_MS == "St Helens") %>% 
+  
+ggplot(Roughy, aes(x=Length, fill = sex)) +
+geom_histogram(binwidth=.5, alpha=.5)+
+  #facet_wrap(~ year)
+  facet_grid(Area_MS ~ year)+
+  #geom_line(Length=30)+
+  theme_bw()
+
+#ggplot(data = RoughyF, mapping = aes(Length)) + 
+ # geom_histogram() +
+#ggplot(data = RoughyM, mmapping = aes(Length))+
+ # geom_histogram()+
+  #facet_wrap(~ year)
+
+
+#SLrange<-  max(Roughy$Length) - min(Roughy$Length) 
+#binssize <- 10
+#class_interval <- SLrange / binssize
+#lower_limit <- seq(min(Roughy$Length), max(Roughy$Length),by = class_interval)-0.1
+#upper_limit <- (lower_limit + class_interval)  -0.1
+#df_bin <- as.data.frame(cbind(lower_limit,upper_limit))
+#df_bin <- df_bin %>% 
+#  mutate(midlength = lower_limit + upper_limit / 2)
+#nrow((df_bin)
+
+```
+
+
+```{r linear regression}
+regression <- lm(year ~ SLadj_cm + sex + Area_MS, data = Roughy)
+
+
+#Short summary of the model
+regression
+
+#Longer summary of the model
+summary(regression)
+```
 
 # My Digital Toolbox
 
