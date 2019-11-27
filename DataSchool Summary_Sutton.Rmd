@@ -1,11 +1,11 @@
 ---
 title: "Oragne Roughy Eastern Zone Survey Data"
-subtitle: "Survey Data from 2019"
+subtitle: "Bioloigical Data from 1987 to 2016"
 author: "Caroline Sutton"
 affiliation: "CSIRO Oceans and Atmosphere"
 photo: resources/img/photo.jpg
 
-short_title: Optional short title
+short_title: Orange Roughy, Hoplostethus atlanticus
 
 output: 
   DSreport::project_summary:
@@ -26,35 +26,43 @@ library(gapminder)
 library(kableExtra)
 library(gifski)
 library(gganimate)
+library(scales)
 
 
 Roughy<-read_csv("Results/OR87to2016.csv") %>% 
   mutate(Length = SLadj_cm)
 ```
 # Introduction
-I'm a biologist with CSIRO's Marine Resources and Industries working in the Acoustics & Pelagic Ecosystems Team. I manage the biological data within the group. This includes colating and standardising historical and new data. I learned to code at Data School. Prior to Data School I managed my data and conducted statistical analyses using Excel, Access and Systat.
+I'm a biologist with CSIRO's Marine Resources and Industries working in the Acoustics & Pelagic Ecosystems Team. I manage the biological data and specimen collections within the group. This includes collecting, collating, standardising and analysing historical and new data. I learned to code at Data School. Prior to Data School I managed my data and conducted statistical analyses using Excel, Access and Systat.
 
-# My Project
-Acoustic and biological data are used to estiamte the spawning biomass of Orange Roughy for stock assesmsnt purposes. Data are collected aboard commercial trawlers from the spawning grounds located on seamounts off the east coast of Tasmania. The biological data include standard length (cm), sex and gonad stage, otoliths are collected for aging purposes. CSIRO has conducted surveys from 1987 to 2019.
-
+# My Project:  Orange Roughy Eastern Zone Spawning Population Biomass Survey Data from 1987 to 2016
+CSIRO has conducted acoustic and biological surveys from 1987 to the present to estimate the spawning biomass of Orange Roughy for stock assessment. Data from 2019 have been excluded from this report because of commercial in confidence concerns. The data used for this project were collected aboard commercial trawlers from the spawning grounds located on seamounts off the east coast of Tasmania. The biological data include standard length (cm), sex, weight, gonad stage and a record of samples collected such as otoliths for aging and tissue samples for fecundity and toxicity analyses. Biological measurements such as standard length, which have been consistently measured and recorded since the fishery began can be used to assess if there have been changes in population size structure over time.
 ## Preliminary results
 
-The majority of my time was spend tidying my data. The
+
 
 **Tables**
 ---
+Much of my time was spent tidying the data. Much of the time was spent standardising the data sets from different surveys particuarly for the earlier years. Table 2 shows my tidy data.
 ```{r mytable, out.width='100%', echo = T}
-knitr::kable(head(Roughy, n = 5), format = "html", caption = "my tidy data") %>% 
-  kable_styling("striped")
+knitr::kable(tail(Roughy, n = 5), format = "html", caption = "My tidy data") %>% 
+  kableExtra::kable_styling("striped") %>%
+  kableExtra::scroll_box(width = "100%")
+
 ```
 
-**Images from a file**
+**How to measure the standard length of an orange roughy**
+--
+The Standard Length of an orange roughyis measured from the tip of the snout to the end of the hypural plate. The figures below show the location of the hypural plate. 
 
-![](resources/img/tidyverse.png){width=100px}
+![](resources/img/RoughyMeasure.jpg){width=1000px}
+![](resources/img/roughy SL measure.jpg){width=1000px}
 
 **Plots from R**
+--
+Orange roughy reach maturity at ~30 cm. Figure 1 shows how standard length has changed over time. Length has declined until ~2005 and appears to have stablised after the fishery closed in 2013.
 
-```{r myfig1, out.width='100%', fig.align='center', fig.cap= "raw length data with means by year"}
+```{r myfig1, out.width='100%', fig.align='center', fig.cap= "Raw length data with means by year"}
 #create a summary table
 Roughy1_group <- Roughy %>% 
   group_by(year,Area_MS,sex) %>% 
@@ -70,7 +78,7 @@ ggplot(data = Roughy,
        mapping = aes(x = year,
                      y = Length,
                      colour = sex)) +
-  geom_jitter(width = .5, size = 1)+
+  geom_jitter(width = .5, size = 0.1, alpha = .5)+
     
     
   geom_line(data=Roughy1_group, size = 1
@@ -79,15 +87,37 @@ ggplot(data = Roughy,
   facet_wrap(~Area_MS)
 ```
 
-Your figure and table captions are automatically numbered and can be referenced in the text
-if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
+The Length to weight relationship for orange roughy is described by the following equation 
+Weight = 0.037 * Length ^ 2.942 (Lyle 1991). Figure 1 shows the Length vs Weight data against the predicted values as determined by by Lyle (1991).
+```{r myfig2, out.width='100%', fig.align='center', fig.cap= "Length vs Weight, showing the predicted values (Lyle 1991)"}
+Lyle_com <- function(x) {(0.037 * (x) ^ 2.942)/1000}
 
-```{r myfig2, echo=FALSE, fig.align='center', fig.cap="length frequencies", message=FALSE, warning=FALSE, out.width='100%'}
+  RoughyWeight<- Roughy %>% 
+  drop_na(weight_kg) %>% 
+  filter(weight_kg != 0)
+  
+
+ggplot(data = RoughyWeight,
+       mapping = aes(x  = Length,
+                     y = weight_kg, colour = as.factor(year))) +
+  geom_point()+
+  stat_function(fun = Lyle_com, colour ="black")+
+  facet_wrap(~year)
+
+#Your figure and table captions are automatically numbered and can be referenced in the text
+#if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
+
+```
+
+
+
+
+```{r myfig3, echo=FALSE, fig.align='center', fig.cap="Length frequencies by year and Area", message=FALSE, warning=FALSE, out.width='100%'}
 #filter(Roughy, Area_MS == "St Helens") %>% 
   
 ggplot(Roughy, aes(x=Length, fill = sex)) +
-geom_histogram(binwidth=.5, alpha=.5)+
- #geom_vline(xintercept = 35)+
+geom_histogram(binwidth=.5, alpha= 1)+
+ geom_vline(xintercept = 35, size = .01)+
   facet_wrap(~ year)+
   #facet_grid(Area_MS ~ year)+
   ##add animation
@@ -127,38 +157,26 @@ geom_histogram(binwidth=.5, alpha=.5)+
 
 # My Digital Toolbox
 
-What digital tools have you been using in your project? Which ones have you learned since starting 
-Data School?
+At Data School Focus I have learned to use the following packages:
 
-You can use all the usual R markdown features in writing a project summary, including lists:
+* tidyverse
+* ggplot2
+* dplyr
+* kableEtra
+* readr
+* tidyr
+* tibble
 
-* R - dplyr, ggplot, ...
-* Python
-* SQL
-
-## Favourite tool (optional)
-
-Is there a tool/package/function in particular that you've enjoyed using? Give it a special shout out here.
-
-![](https://raw.githubusercontent.com/tidyverse/ggplot2/master/man/figures/logo.png){.pull-right width=100px}
-
-No prizes for guessing mine:
 
 # My time went ...
 
-What parts of the project took the most time and effort? Were there any surprising challenges you
-encountered, and how did you solve them?
+I spent most of my time tidying my data. I am very impressed with the way coding enables all the steps and choices made during the tidying and data wrangling process can be docuumented. 
 
 # Next steps
 
-What further steps do you wish your project could take? Or are there any new digital skills that you
-are keen to develop as a result of your involvement in the Data School?
+I am interested in learning how to used ggannimate. Animations are a useful tool to show how a population changes over time. I would also like to use it to demonstrate the "biological pump" i.e. how the depth distribution of the micronekton (animals< 2cm) change diurnally.  
 
 # My Data School Experience
 
-This poster is mostly about your synthesis project. However we would also like to hear about other
-parts of your Data School experience. What aspects of the program did you really enjoy? How have you
-been applying the skills you have learned in your daily work? Have you been able to transfer this 
-knowledge to your team members? Concrete examples demonstrating this would be useful here
-(meetings/talks/collaborations/new roles). Any descriptions of the personal impact the program has 
-had are welcome here as well!
+Data School has been a very useful and rewarding experience and has changed the way I do my job. It has enable me to manage and document my 
+
