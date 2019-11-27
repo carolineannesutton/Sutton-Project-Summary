@@ -37,13 +37,15 @@ I'm a biologist with CSIRO's Marine Resources and Industries working in the Acou
 
 # My Project:  Orange Roughy Eastern Zone Spawning Population Biomass Survey Data from 1987 to 2016
 CSIRO has conducted acoustic and biological surveys from 1987 to the present to estimate the spawning biomass of Orange Roughy for stock assessment. Data from 2019 have been excluded from this report because of commercial in confidence concerns. The data used for this project were collected aboard commercial trawlers from the spawning grounds located on seamounts off the east coast of Tasmania. The biological data include standard length (cm), sex, weight, gonad stage and a record of samples collected such as otoliths for aging and tissue samples for fecundity and toxicity analyses. Biological measurements such as standard length, which have been consistently measured and recorded since the fishery began can be used to assess if there have been changes in population size structure over time.
+
 ## Preliminary results
 
 
 
 **Tables**
 ---
-Much of my time was spent tidying the data. Much of the time was spent standardising the data sets from different surveys particuarly for the earlier years. Table 2 shows my tidy data.
+Data wrangling and tidying is very time consuming but that is nothing new! The survey data were collected by different researches and projects it was necessary to standardise the datasets from the various surveys. Table 2 shows my tidy data.
+
 ```{r mytable, out.width='100%', echo = T}
 knitr::kable(tail(Roughy, n = 5), format = "html", caption = "My tidy data") %>% 
   kableExtra::kable_styling("striped") %>%
@@ -53,71 +55,23 @@ knitr::kable(tail(Roughy, n = 5), format = "html", caption = "My tidy data") %>%
 
 **How to measure the standard length of an orange roughy**
 --
-The Standard Length of an orange roughyis measured from the tip of the snout to the end of the hypural plate. The figures below show the location of the hypural plate. 
+The Standard Length of an orange roughy is measured from the tip of the snout to the end of the hypural plate. The figures below show the location of the hypural plate. 
 
-![](resources/img/RoughyMeasure.jpg){width=1000px}
+
+
+![](resources/img/RoughyMeasure.jpg){width=1000px}|
 ![](resources/img/roughy SL measure.jpg){width=1000px}
 
 **Plots from R**
 --
-Orange roughy reach maturity at ~30 cm. Figure 1 shows how standard length has changed over time. Length has declined until ~2005 and appears to have stablised after the fishery closed in 2013.
 
-```{r myfig1, out.width='100%', fig.align='center', fig.cap= "Raw length data with means by year"}
-#create a summary table
-Roughy1_group <- Roughy %>% 
-  group_by(year,Area_MS,sex) %>% 
-  summarise(SLadj_cm_mean = mean(SLadj_cm),
-            sdSL = sd(SLadj_cm, na.rm = TRUE),
-            n(),
-            seSL = sd(SLadj_cm) / sqrt(n())
-            ) %>% 
-  rename(Length = SLadj_cm_mean)
-
-#ploting raw data with means
-ggplot(data = Roughy,
-       mapping = aes(x = year,
-                     y = Length,
-                     colour = sex)) +
-  geom_jitter(width = .5, size = 0.1, alpha = .5)+
-    
-    
-  geom_line(data=Roughy1_group, size = 1
-          )+
-  theme(legend.position = "bottom")+
-  facet_wrap(~Area_MS)
-```
-
-The Length to weight relationship for orange roughy is described by the following equation 
-Weight = 0.037 * Length ^ 2.942 (Lyle 1991). Figure 1 shows the Length vs Weight data against the predicted values as determined by by Lyle (1991).
-```{r myfig2, out.width='100%', fig.align='center', fig.cap= "Length vs Weight, showing the predicted values (Lyle 1991)"}
-Lyle_com <- function(x) {(0.037 * (x) ^ 2.942)/1000}
-
-  RoughyWeight<- Roughy %>% 
-  drop_na(weight_kg) %>% 
-  filter(weight_kg != 0)
-  
-
-ggplot(data = RoughyWeight,
-       mapping = aes(x  = Length,
-                     y = weight_kg, colour = as.factor(year))) +
-  geom_point()+
-  stat_function(fun = Lyle_com, colour ="black")+
-  facet_wrap(~year)
-
-#Your figure and table captions are automatically numbered and can be referenced in the text
-#if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
-
-```
-
-
-
-
-```{r myfig3, echo=FALSE, fig.align='center', fig.cap="Length frequencies by year and Area", message=FALSE, warning=FALSE, out.width='100%'}
+Figure 1 shows the length frequency distrubtion by year. The vertical line represents size at maturity (30 cm)
+```{r myfig1, echo=FALSE, fig.align='center', fig.cap="Length frequencies by year and Area", message=FALSE, warning=FALSE, out.width='100%'}
 #filter(Roughy, Area_MS == "St Helens") %>% 
   
 ggplot(Roughy, aes(x=Length, fill = sex)) +
 geom_histogram(binwidth=.5, alpha= 1)+
- geom_vline(xintercept = 35, size = .01)+
+ geom_vline(xintercept = 30, size = .01)+
   facet_wrap(~ year)+
   #facet_grid(Area_MS ~ year)+
   ##add animation
@@ -140,6 +94,26 @@ geom_histogram(binwidth=.5, alpha= 1)+
 #df_bin <- df_bin %>% 
 #  mutate(midlength = lower_limit + upper_limit / 2)
 #nrow((df_bin)
+```
+
+Figure 2 shows the length to weight relationship for the surveys that collected weight data. The black line represents the expected relationship for both sexes (Weight = 0.037 * Length ^ 2.942) as per Lyne (1991).  
+```{r myfig2, out.width='100%', fig.align='center', fig.cap= "Length vs Weight, showing the predicted values (Lyle 1991)"}
+Lyle_com <- function(x) {(0.037 * (x) ^ 2.942)/1000}
+
+  RoughyWeight<- Roughy %>% 
+  drop_na(weight_kg) %>% 
+  filter(weight_kg != 0)
+  
+
+ggplot(data = RoughyWeight,
+       mapping = aes(x  = Length,
+                     y = weight_kg, colour = as.factor(year))) +
+  geom_point()+
+  stat_function(fun = Lyle_com, colour ="black")+
+  facet_wrap(~year)
+
+#Your figure and table captions are automatically numbered and can be referenced in the text
+#if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
 
 ```
 
@@ -166,17 +140,16 @@ At Data School Focus I have learned to use the following packages:
 * readr
 * tidyr
 * tibble
+* ggannimate (in progress)
 
 
 # My time went ...
 
-I spent most of my time tidying my data. I am very impressed with the way coding enables all the steps and choices made during the tidying and data wrangling process can be docuumented. 
+I spent most of my time tidying my data. I am very impressed with the way coding enables all the steps and choices made during the tidying and data wrangling process to be docuumented. 
 
 # Next steps
-
-I am interested in learning how to used ggannimate. Animations are a useful tool to show how a population changes over time. I would also like to use it to demonstrate the "biological pump" i.e. how the depth distribution of the micronekton (animals< 2cm) change diurnally.  
+I will continue to explore visualising with ggplot look deeper into statistical analyses. My very next step will be to use geom_smooth to fit log curve to the length-weight data and compare the predicted to the expected relationship. I am also interested to learn gganimate. Annimation would be an efficient method to show population changes over time for the orange roughy length frequency data. I will then progress to tidy my other datasets, in particular I am interested using ggannimate to explore our Micronekton (animals < 2cm) datasets. I think gganimate would be a useful tool to demonstrate the diurnal movement of  Micronekton from deeper waters in the day to surface water at night, this phenomenon  is referred to as the “biological pump”.
 
 # My Data School Experience
 
-Data School has been a very useful and rewarding experience and has changed the way I do my job. It has enable me to manage and document my 
-
+Data School has been a very useful and rewarding experience and has changed the way I do my job. I can now manage and document my data wrangling which was previously recorded in notebooks and reports.  This has been hugely transformative as much of my job involves collating data from different researchers and projects with varied field and data management practices. I am also very grateful for the encouragement, patience and kindness of the Data School Focus team who made the learning process fun and manageable.
