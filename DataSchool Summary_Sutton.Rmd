@@ -24,6 +24,8 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(gapminder)
 library(kableExtra)
+
+
 Roughy<-read_csv("Results/OR87to2016.csv") %>% 
   mutate(Length = SLadj_cm)
 ```
@@ -90,8 +92,10 @@ head(Roughy)
   
 ggplot(Roughy, aes(x=Length, fill = sex)) +
 geom_histogram(binwidth=.5, alpha=.5)+
+ geom_vline(xintercept = 32)+
   #facet_wrap(~ year)
   facet_grid(Area_MS ~ year)+
+    
   #geom_line(Length=30)+
   theme_bw()
 
