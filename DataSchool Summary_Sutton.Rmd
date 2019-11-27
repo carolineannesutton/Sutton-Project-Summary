@@ -24,6 +24,8 @@ knitr::opts_chunk$set(
 library(tidyverse)
 library(gapminder)
 library(kableExtra)
+library(gifski)
+library(gganimate)
 
 
 Roughy<-read_csv("Results/OR87to2016.csv") %>% 
@@ -33,17 +35,11 @@ Roughy<-read_csv("Results/OR87to2016.csv") %>%
 I'm a biologist with CSIRO's Marine Resources and Industries working in the Acoustics & Pelagic Ecosystems Team. I manage the biological data within the group. This includes colating and standardising historical and new data. I learned to code at Data School. Prior to Data School I managed my data and conducted statistical analyses using Excel, Access and Systat.
 
 # My Project
-I am using Data from the 2019. This included
+Acoustic and biological data are used to estiamte the spawning biomass of Orange Roughy for stock assesmsnt purposes. Data are collected aboard commercial trawlers from the spawning grounds located on seamounts off the east coast of Tasmania. The biological data include standard length (cm), sex and gonad stage, otoliths are collected for aging purposes. CSIRO has conducted surveys from 1987 to 2019.
 
 ## Preliminary results
 
-This section will demonstrate the different visuals you might want use to show off your 
-project. Don't feel the need to go overboard, this is supposed to give a taste of the work you are
-doing rather than being a publication ready document.
-
-To get tables formatting correctly, use `knitr::kable` to convert the table to html format. If
-you also want to have alternate row highlighting, pass the result to `kable_styling('striped')` 
-from the `kableExtra` package.
+The majority of my time was spend tidying my data. The
 
 **Tables**
 ---
@@ -86,17 +82,16 @@ ggplot(data = Roughy,
 Your figure and table captions are automatically numbered and can be referenced in the text
 if needed: see eg. Table \@ref(tab:mytable) and Figure \@ref(fig:standard-plot)
 
-```{r myfig2}
-head(Roughy)
+```{r myfig2, echo=FALSE, fig.align='center', fig.cap="length frequencies", message=FALSE, warning=FALSE, out.width='100%'}
 #filter(Roughy, Area_MS == "St Helens") %>% 
   
 ggplot(Roughy, aes(x=Length, fill = sex)) +
 geom_histogram(binwidth=.5, alpha=.5)+
- geom_vline(xintercept = 32)+
-  #facet_wrap(~ year)
-  facet_grid(Area_MS ~ year)+
-    
-  #geom_line(Length=30)+
+ #geom_vline(xintercept = 35)+
+  facet_wrap(~ year)+
+  #facet_grid(Area_MS ~ year)+
+  ##add animation
+    #transition_reveal(year)+
   theme_bw()
 
 #ggplot(data = RoughyF, mapping = aes(Length)) + 
@@ -120,14 +115,14 @@ geom_histogram(binwidth=.5, alpha=.5)+
 
 
 ```{r linear regression}
-regression <- lm(year ~ SLadj_cm + sex + Area_MS, data = Roughy)
+#regression <- lm(year ~ SLadj_cm + sex + Area_MS, data = Roughy)
 
 
 #Short summary of the model
-regression
+#regression
 
 #Longer summary of the model
-summary(regression)
+#Esummary(regression)
 ```
 
 # My Digital Toolbox
