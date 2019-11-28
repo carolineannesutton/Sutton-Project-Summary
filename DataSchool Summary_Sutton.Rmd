@@ -63,10 +63,36 @@ The Standard Length of an orange roughy is measured from the tip of the snout to
 ![](resources/img/roughy SL measure.jpg){width=1000px}
 
 **Plots from R**
---
+---
 
-Figure 1 shows the length frequency distrubtion by year. The vertical line represents size at maturity (30 cm)
-```{r myfig1, echo=FALSE, fig.align='center', fig.cap="Length frequencies by year and Area", message=FALSE, warning=FALSE, out.width='100%'}
+Figure 1 show the raw standard length data by year and spawning area. The lines represent the averages for each grouping
+```{r myfig1, out.width='100%', fig.align='center', fig.cap= "Raw length data with means by year"}
+#create a summary table
+Roughy1_group <- Roughy %>% 
+  group_by(year,Area_MS,sex) %>% 
+  summarise(SLadj_cm_mean = mean(SLadj_cm),
+            sdSL = sd(SLadj_cm, na.rm = TRUE),
+            n(),
+            seSL = sd(SLadj_cm) / sqrt(n())
+            ) %>% 
+  rename(Length = SLadj_cm_mean)
+
+#ploting raw data with means
+ggplot(data = Roughy,
+       mapping = aes(x = year,
+                     y = Length,
+                     colour = sex)) +
+  geom_jitter(width = .5, size = 0.1, alpha = .5)+
+    
+    
+  geom_line(data=Roughy1_group, size = 1
+          )+
+  theme(legend.position = "bottom")+
+  facet_wrap(~Area_MS)
+```
+
+Figure 2 shows the length frequency distrubtion by year. The vertical line represents size at maturity (30 cm)
+```{r myfig2, echo=FALSE, fig.align='center', fig.cap="Length frequencies by year and Area", message=FALSE, warning=FALSE, out.width='100%'}
 #filter(Roughy, Area_MS == "St Helens") %>% 
   
 ggplot(Roughy, aes(x=Length, fill = sex)) +
@@ -96,8 +122,8 @@ geom_histogram(binwidth=.5, alpha= 1)+
 #nrow((df_bin)
 ```
 
-Figure 2 shows the length to weight relationship for the surveys that collected weight data. The black line represents the expected relationship for both sexes (Weight = 0.037 * Length ^ 2.942) as per Lyne (1991).  
-```{r myfig2, out.width='100%', fig.align='center', fig.cap= "Length vs Weight, showing the predicted values (Lyle 1991)"}
+Figure 3 shows the length to weight relationship for the surveys that collected weight data. The black line represents the expected relationship for both sexes (Weight = 0.037 * Length ^ 2.942) as per Lyne (1991).  
+```{r myfig3, out.width='100%', fig.align='center', fig.cap= "Length vs Weight, showing the predicted values (Lyle 1991)"}
 Lyle_com <- function(x) {(0.037 * (x) ^ 2.942)/1000}
 
   RoughyWeight<- Roughy %>% 
